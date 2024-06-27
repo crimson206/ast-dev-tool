@@ -1,5 +1,1 @@
 pydantic
-coverage
-pytest-cov
-pytest
-crimson-file-loader
