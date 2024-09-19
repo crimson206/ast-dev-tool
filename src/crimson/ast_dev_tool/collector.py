@@ -1,55 +1,73 @@
-from typing import List, Type, Literal, Union, overload
+from typing import List, Type, Literal, Union, overload, TypeVar, Generic
 import ast
 from ast import unparse
 from .getter import get_node, _SourceObjectTypes, _SourceObjectType
 
+T = TypeVar('T', bound=ast.AST)
 
-class NodeCollector(ast.NodeVisitor):
-    def __init__(self, node_type: Type[ast.AST]):
+class NodeCollector(ast.NodeVisitor, Generic[T]):
+    def __init__(self, node_type: Type[T]):
         self.node_type = node_type
-        self.nodes = []
+        self.nodes: List[T] = []
 
     def visit(self, node: ast.AST):
         if isinstance(node, self.node_type):
             self.nodes.append(node)
         self.generic_visit(node)
 
+@overload
+def collect_nodes(
+    node: ast.AST,
+    node_type: Type[T],
+    return_type: Literal["nodes"] = "nodes",
+) -> List[T]:
+    ...
 
 @overload
 def collect_nodes(
     node: ast.AST,
-    node_type: Type[ast.AST],
-    return_type: Literal["nodes", "sources"] = "nodes",
-) -> Union[List[ast.AST], List[str]]:
-    """The shape of the sources are not preserved"""
+    node_type: Type[T],
+    return_type: Literal["sources"],
+) -> List[str]:
     ...
-
 
 @overload
 def collect_nodes(
     source: str,
-    node_type: Type[ast.AST],
-    return_type: Literal["nodes", "sources"] = "nodes",
-) -> Union[List[ast.AST], List[str]]:
-    """The shape of the sources are not preserved"""
+    node_type: Type[T],
+    return_type: Literal["nodes"] = "nodes",
+) -> List[T]:
     ...
 
+@overload
+def collect_nodes(
+    source: str,
+    node_type: Type[T],
+    return_type: Literal["sources"],
+) -> List[str]:
+    ...
 
 @overload
 def collect_nodes(
     object: _SourceObjectType,
-    node_type: Type[ast.AST],
-    return_type: Literal["nodes", "sources"] = "nodes",
-) -> Union[List[ast.AST], List[str]]:
-    """The shape of the sources are not preserved"""
+    node_type: Type[T],
+    return_type: Literal["nodes"] = "nodes",
+) -> List[T]:
     ...
 
+@overload
+def collect_nodes(
+    object: _SourceObjectType,
+    node_type: Type[T],
+    return_type: Literal["sources"],
+) -> List[str]:
+    ...
 
 def collect_nodes(
     input: Union[str, ast.AST, _SourceObjectType],
-    node_type: Type[ast.AST],
+    node_type: Type[T],
     return_type: Literal["nodes", "sources"] = "nodes",
-) -> Union[List[ast.AST], List[str]]:
+) -> Union[List[T], List[str]]:
 
     if any([type(input) is str, type(input) in _SourceObjectTypes]):
         node = get_node(input)
@@ -63,8 +81,8 @@ def collect_nodes(
     nodes = collector.nodes
 
     if return_type == "nodes":
-        pass
+        return nodes
     elif return_type == "sources":
-        nodes = [unparse(node) for node in nodes]
+        return [unparse(node) for node in nodes]
 
-    return nodes
+    raise ValueError("Invalid return_type")
