@@ -7,13 +7,13 @@ from inspect import getsource
 from .util import clean_indent
 # object, source, node
 
-_SourceObjectType = Union[ModuleType, Type, FunctionType, MethodType]
+SourceObjectType = Union[ModuleType, Type, FunctionType, MethodType]
 # type is for the type of classes
 _SourceObjectTypes = (ModuleType, Type, FunctionType, MethodType, type)
 
 
 @overload
-def get_node(object: _SourceObjectType) -> ast.AST:
+def get_node(object: SourceObjectType) -> ast.AST:
     ...
 
 
@@ -22,8 +22,10 @@ def get_node(source: str) -> ast.AST:
     ...
 
 
-def get_node(target: Union[object, str]) -> ast.AST:
-    if type(target) is str:
+def get_node(target: Union[object, str, ast.AST]) -> ast.AST:
+    if isinstance(target, ast.AST):
+        return target
+    elif type(target) is str:
         source = target
     elif type(target) in _SourceObjectTypes:
         source = getsource(object=target)

@@ -1,7 +1,7 @@
 from typing import Union
 import ast
 from typing import overload
-from .getter import get_node, _SourceObjectType, _SourceObjectTypes
+from .getter import get_node, SourceObjectType, _SourceObjectTypes
 
 
 @overload
@@ -17,12 +17,12 @@ def print_node(source: str, indent=2) -> None:
 
 
 @overload
-def print_node(object: _SourceObjectType, indent=2) -> None:
+def print_node(object: SourceObjectType, indent=2) -> None:
     """doc"""
     ...
 
 
-def print_node(target: Union[ast.AST, str, _SourceObjectType], indent=2) -> None:
+def print_node(target: Union[ast.AST, str, SourceObjectType], indent=2) -> None:
     if any([type(target) is str, type(target) in _SourceObjectTypes]):
         node = get_node(target)
     elif isinstance(target, ast.AST):
