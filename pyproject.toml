@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "crimson-ast-dev-tool"
-version = "0.2.2"
+version = "0.2.3"
 description = "basic setups to use ast"
 readme = "README.md"
 authors = [
